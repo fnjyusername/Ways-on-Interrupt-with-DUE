@@ -1,0 +1,98 @@
+Enter file contents here
+/*
+This code provides 8 channel of external interrupt
+from PIN 44 to PIN 51 of Arduino DUE using timer counter TC0 (define here as USE_PPM 0 )
+*/
+
+#include "Arduino.h"
+/**********RC Definition**************/
+#define USE_PPM 0 
+//#define USE_PPM 1 (not used)
+volatile uint16_t PPMt[16]; // unvalidated input
+volatile uint16_t PPM[16];
+volatile uint8_t  PPMch = 255;
+volatile uint32_t PPMlast=0;
+uint32_t pwmLast[8];
+/*********IMU Definition**************/
+
+void setup() 
+{
+//Serial Initialization
+Serial.begin(115200);
+//Interrupt Initialization
+setupInput(USE_PPM);
+}
+
+void loop() 
+{
+  Serial.print(PPM[2]);  //Ail
+  Serial.print('\t');  
+  Serial.print(PPM[3]);  //Elev
+  Serial.print('\t');  
+  Serial.print(PPM[4]);  //Thro
+  Serial.print('\t');  
+  Serial.println(PPM[5]);//Yaw 
+}
+
+
+/****************************************************************************/
+/************************(RC PPM RECEIVER FUNCTIONS)*************************/
+/****************************************************************************/
+void setupInput(int isPPM)
+{
+  pmc_enable_periph_clk(ID_TC1);
+    // use timer just for timing reference
+    TC_Configure(TC0, 1, TC_CMR_TCCLKS_TIMER_CLOCK1);
+    TC_Start(TC0,1);
+    
+  /* INTERRUPT CONFIG 8-CHANNEL AVAILABLE @ PIN 44-51*/ 
+  /* Formula: attachInterrupt(Pin,functiionName,Mode)*/ 
+  
+  //attachInterrupt(44,ch1Handler,CHANGE);
+  //attachInterrupt(45,ch1Handler,CHANGE);    
+    attachInterrupt(46,ch1Handler,CHANGE);
+    attachInterrupt(47,ch2Handler,CHANGE);
+    attachInterrupt(48,ch3Handler,CHANGE);
+    attachInterrupt(49,ch4Handler,CHANGE);
+  //attachInterrupt(50,ch1Handler,CHANGE);
+  //attachInterrupt(51,ch1Handler,CHANGE);    
+}
+
+/* INTERRUPT FUNCTION*/
+//void ch1Handler() { pwmHandler(0, 44); }
+//void ch1Handler() { pwmHandler(1, 45); }
+  void ch1Handler() { pwmHandler(2, 46); }
+  void ch2Handler() { pwmHandler(3, 47); }
+  void ch3Handler() { pwmHandler(4, 48); }
+  void ch4Handler() { pwmHandler(5, 49); }
+//void ch1Handler() { pwmHandler(6, 50); }
+//void ch1Handler() { pwmHandler(7, 51); }
+
+
+/*
+CALLING IN DUE BUILT-IN LIBRARY
+This update extract +pulse width and store to PPM[ch] variable 
+for each triggered (HIGH) pin i.e. PPM[0], PPM[1] PPM[2] ....etc.
+*/
+
+void pwmHandler(uint8_t ch, uint32_t pin) 
+{
+  // cv - is timer variable stores time lapse by "TC0->TC_CHANNEL[1].TC_CV"
+  // it is like millis() or micros() in standard arduino timer function
+  // that measures time lapse since microcontroller is powerd up
+  // alternatively you can use millis() or micros() in lieu of "TC0->TC_CHANNEL[1].TC_CV" below.
+  uint32_t cv = TC0->TC_CHANNEL[1].TC_CV;
+
+    //This "if" statement measures time lapse of +pulse
+    //Time of HIGH is first recorded from "cv"
+    //Time of LOW is next recorded
+    //Then time of LOW is subtructed to time when HIGH to get the +pulse   
+    if (digitalRead(pin)) 
+    {
+      pwmLast[ch] = cv;
+    } else 
+    {
+      PPM[ch] = (cv - pwmLast[ch]) / 42;
+    }
+}
+
