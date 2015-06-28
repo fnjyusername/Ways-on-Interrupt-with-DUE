@@ -2,6 +2,7 @@ Enter file contents here
 /*
 This code provides 8 channel of external interrupt
 from PIN 44 to PIN 51 of Arduino DUE using timer counter TC0 (define here as USE_PPM 0 )
+Note that there are three timer that can be utilized i.e. TC0, TC1, TC2
 */
 
 #include "Arduino.h"
