@@ -48,25 +48,25 @@ void setupInput(int isPPM)
   /* INTERRUPT CONFIG 8-CHANNEL AVAILABLE @ PIN 44-51*/ 
   /* Formula: attachInterrupt(Pin,functiionName,Mode)*/ 
   
-  //attachInterrupt(44,ch1Handler,CHANGE);
-  //attachInterrupt(45,ch1Handler,CHANGE);    
+    attachInterrupt(44,ch1Handler,CHANGE);
+    attachInterrupt(45,ch1Handler,CHANGE);    
     attachInterrupt(46,ch1Handler,CHANGE);
     attachInterrupt(47,ch2Handler,CHANGE);
     attachInterrupt(48,ch3Handler,CHANGE);
     attachInterrupt(49,ch4Handler,CHANGE);
-  //attachInterrupt(50,ch1Handler,CHANGE);
-  //attachInterrupt(51,ch1Handler,CHANGE);    
+    attachInterrupt(50,ch1Handler,CHANGE);
+    attachInterrupt(51,ch1Handler,CHANGE);    
 }
 
 /* INTERRUPT FUNCTION*/
-//void ch1Handler() { pwmHandler(0, 44); }
-//void ch1Handler() { pwmHandler(1, 45); }
+  void ch1Handler() { pwmHandler(0, 44); }
+  void ch1Handler() { pwmHandler(1, 45); }
   void ch1Handler() { pwmHandler(2, 46); }
   void ch2Handler() { pwmHandler(3, 47); }
   void ch3Handler() { pwmHandler(4, 48); }
   void ch4Handler() { pwmHandler(5, 49); }
-//void ch1Handler() { pwmHandler(6, 50); }
-//void ch1Handler() { pwmHandler(7, 51); }
+  void ch1Handler() { pwmHandler(6, 50); }
+  void ch1Handler() { pwmHandler(7, 51); }
 
 
 /*
@@ -81,6 +81,7 @@ void pwmHandler(uint8_t ch, uint32_t pin)
   // it is like millis() or micros() in standard arduino timer function
   // that measures time lapse since microcontroller is powerd up
   // alternatively you can use millis() or micros() in lieu of "TC0->TC_CHANNEL[1].TC_CV" below.
+  
   uint32_t cv = TC0->TC_CHANNEL[1].TC_CV;
 
     //This "if" statement measures time lapse of +pulse
